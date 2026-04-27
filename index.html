@@ -518,6 +518,45 @@ window.addEventListener('focus', function() {
   }
 });
 
+// ── Защита от обрывов сети (auto-recovery) ──
+let lastReloadAt = 0;
+const reloadHistory = [];
+
+function attemptReload(reason) {
+  if (mode !== 'playing') return;
+  const now = Date.now();
+  if (now - lastReloadAt < 10000) return;
+
+  const savedTime = (isFinite(audio.currentTime) && audio.currentTime > 0)
+    ? audio.currentTime
+    : elapsed;
+  if (!isFinite(savedTime) || savedTime <= 0) return;
+
+  lastReloadAt = now;
+  reloadHistory.push(now);
+  while (reloadHistory.length && reloadHistory[0] < now - 30000) reloadHistory.shift();
+  if (reloadHistory.length >= 3) {
+    console.warn('[audio recovery] частые перезагрузки:', reloadHistory.length, 'за 30 сек,', reason);
+  }
+  console.log('[audio recovery]', reason, 'at', savedTime.toFixed(1));
+
+  const onReady = function() {
+    audio.removeEventListener('canplay', onReady);
+    try { audio.currentTime = savedTime; } catch (e) {}
+    if (mode === 'playing') audio.play().catch(function(){});
+  };
+  audio.addEventListener('canplay', onReady);
+  try { audio.load(); } catch (e) {}
+}
+
+audio.addEventListener('stalled', function() { attemptReload('stalled'); });
+audio.addEventListener('error',   function() { attemptReload('error'); });
+audio.addEventListener('waiting', function() {
+  setTimeout(function() {
+    if (mode === 'playing' && audio.readyState < 3) attemptReload('waiting');
+  }, 4000);
+});
+
 function endSession() {
   mode = 'start';
   cancelAnimationFrame(rafAudio);
