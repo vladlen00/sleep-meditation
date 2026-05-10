@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Медитация глубокого сна — irena.bio</title>
 <script src="telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Raleway:wght@200;300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Raleway:wght@200;300;400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { width:100%; height:100%; background:#040208; overflow:hidden; font-family:'Raleway',sans-serif; touch-action:manipulation; }
@@ -20,14 +20,103 @@
     pointer-events:none;
   }
 
+  .header-wrap {
+    display:flex; flex-direction:column; align-items:center; gap:6px; width:100%;
+  }
   .title {
     font-family:'Cormorant Garamond',serif; font-style:italic; font-weight:300;
-    font-size:clamp(1.2rem,4.5vw,1.8rem);
-    letter-spacing:0.14em;
-    color:rgba(210,120,150,0.85);
-    text-shadow:0 2px 10px rgba(0,0,0,1), 0 0 25px rgba(180,30,70,0.5);
-    text-align:center; width:100%; padding:0 16px;
+    font-size:clamp(1.6rem,6.5vw,2.4rem);
+    color:#d896a8;
+    text-align:center;
+    text-shadow:0 2px 10px rgba(0,0,0,1), 0 0 25px rgba(0,0,0,0.6);
   }
+  .subtitle {
+    font-family:'Raleway',sans-serif; font-weight:400;
+    font-size:12px; letter-spacing:0.1em; text-transform:uppercase;
+    color:#7a6068;
+    text-shadow:0 1px 4px rgba(0,0,0,0.9);
+  }
+
+  .info-block {
+    pointer-events:all;
+    width:100%; max-width:380px;
+    display:flex; flex-direction:column; align-items:center;
+    gap:10px; text-align:center;
+    background:rgba(0,0,0,0.78);
+    backdrop-filter:blur(4px);
+    -webkit-backdrop-filter:blur(4px);
+    border-radius:18px;
+    padding:18px 20px;
+  }
+  .info-intro {
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic;
+    font-size:14px;
+    color:#b08894;
+    font-weight:400;
+  }
+  .info-list {
+    list-style:none; padding:0; margin:0;
+    display:flex; flex-direction:column; gap:7px;
+    font-family:'Raleway',sans-serif;
+    font-weight:500;
+    font-size:14px; line-height:1.4;
+    color:#e8d0d8;
+    text-align:left;
+    width:100%;
+  }
+  .info-list li {
+    position:relative;
+    padding-left:18px;
+  }
+  .info-list li::before {
+    content:"·";
+    color:#d896a8;
+    font-weight:700;
+    position:absolute;
+    left:4px;
+    top:0;
+  }
+  .info-details {
+    display:none;
+    margin-top:4px;
+    font-family:'Raleway',sans-serif;
+    font-weight:400;
+    font-size:13px; line-height:1.6;
+    color:#d8c0c8;
+    text-align:left;
+  }
+  .info-details p { margin-bottom:8px; text-align:left; }
+  .info-details p:last-child { margin-bottom:0; }
+  .recommend {
+    margin-top:10px;
+    padding:12px 14px;
+    background:rgba(216,150,165,0.1);
+    border:1px solid rgba(216,150,165,0.3);
+    border-radius:10px;
+    font-family:'Raleway',sans-serif;
+    font-weight:400;
+    font-size:13px; line-height:1.5;
+    color:#e0c8d0;
+    text-align:left;
+    display:flex;
+    gap:8px;
+    align-items:flex-start;
+  }
+  .info-toggle {
+    background:none; border:none; cursor:pointer;
+    color:#d896a8;
+    font-family:'Raleway',sans-serif;
+    font-weight:500;
+    font-size:13px;
+    padding:8px 14px;
+    -webkit-tap-highlight-color:transparent;
+    letter-spacing:0.04em;
+  }
+
+  body.details-open .info-details { display:block; }
+  body.session-active .info-block,
+  body.session-active .subtitle { display:none; }
 
   .bottom {
     pointer-events:all;
@@ -146,7 +235,28 @@
 </audio>
 
 <div class="screen">
-  <div class="title">Медитация глубокого сна</div>
+  <div class="header-wrap">
+    <div class="title">Глубокий сон</div>
+    <div class="subtitle">15 МИН · НОЧНАЯ</div>
+  </div>
+
+  <div class="info-block" id="infoBlock">
+    <div class="info-intro">Медитация для тех, кто хочет:</div>
+    <ul class="info-list">
+      <li>Легче провалиться в сон</li>
+      <li>Убрать мысли в голове перед сном</li>
+      <li>Лучше восстановиться ночью</li>
+    </ul>
+    <div class="info-details">
+      <p>Эта практика приведёт тебя из состояния «голова не выключается» в глубокий, спокойный сон. Это же дневная версия но без выхода в конце. Просто включи и засыпай.</p>
+      <div class="recommend">
+        <span>🔁</span>
+        <span>Включай перед сном по необходимости. Можно чередовать с другими медитациями канала.</span>
+      </div>
+    </div>
+    <button class="info-toggle" id="infoToggle" type="button">↓ Подробнее</button>
+  </div>
+
   <div class="bottom">
     <button class="btn" id="mainBtn">Старт</button>
     <div class="progress-wrap" id="pw">
@@ -330,13 +440,15 @@ class Spark {
 const sparks = Array.from({length: 70}, () => new Spark());
 
 let t = 0;
+let flowerScale = 1, flowerTarget = 1;
 
 function drawFrame() {
   t += 0.006;
   ctx.fillStyle = 'rgba(4,2,8,0.22)';
   ctx.fillRect(0, 0, W, H);
 
-  const R = S * 0.38;
+  flowerScale += (flowerTarget - flowerScale) * 0.08;
+  const R = S * 0.38 * flowerScale;
   ctx.save();
   ctx.globalCompositeOperation = 'screen';
 
@@ -405,6 +517,13 @@ const repeatBtn = document.getElementById('repeatBtn');
 const track     = document.getElementById('progressTrack');
 const skipBack  = document.getElementById('skipBack');
 const skipFwd   = document.getElementById('skipFwd');
+const infoToggle = document.getElementById('infoToggle');
+
+infoToggle.addEventListener('click', function() {
+  const open = document.body.classList.toggle('details-open');
+  flowerTarget = open ? 0.75 : 1;
+  infoToggle.textContent = open ? '↑ Свернуть' : '↓ Подробнее';
+});
 
 let mode = 'start';
 let rafAudio = null;
@@ -463,6 +582,7 @@ mainBtn.addEventListener('click', function() {
   if (mode === 'start') {
     mode = 'playing';
     elapsed = 0; lastTs = null;
+    document.body.classList.add('session-active');
     pw.style.display = 'flex';
     mainBtn.textContent = 'Пауза';
     audio.currentTime = 0;
@@ -500,6 +620,7 @@ repeatBtn.addEventListener('click', function() {
   pf.style.width = '0%';
   pw.style.display = 'none';
   mainBtn.textContent = 'Старт';
+  document.body.classList.remove('session-active');
 });
 
 
