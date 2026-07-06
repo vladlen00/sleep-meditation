@@ -226,6 +226,7 @@
 </style>
 </head>
 <body>
+<a id="appBackBtn" href="https://vladlen00.github.io/studio/?v=3" style="display:none;position:fixed;top:12px;left:12px;z-index:100;align-items:center;gap:6px;padding:8px 14px;background:rgba(160,120,255,0.15);border:1px solid rgba(160,120,255,0.35);border-radius:12px;color:#e0d8f0;font-size:13px;font-weight:600;text-decoration:none;">← В студию</a>
 <div class="app">
 
 <canvas id="c"></canvas>
@@ -351,7 +352,26 @@ function irenaShowBlocked(reason) {
   document.body.appendChild(overlay);
 }
 
+// ДВЕРЬ 2: веб-токен из #irena_token (только веб; в ТГ initData есть -> сюда токен не кладём -> no-op).
+function irenaConsumeWebToken() {
+  try {
+    var raw = location.hash || "";
+    if (raw.charAt(0) === "#") raw = raw.slice(1);
+    if (!raw) return false;
+    var params = new URLSearchParams(raw);
+    var token = params.get("irena_token");
+    if (!token) return false;
+    var ttl = parseInt(params.get("exp") || "0", 10);
+    if (!ttl || ttl <= 0) ttl = 900;
+    irenaStoreToken(token, ttl);
+    params.delete("irena_token"); params.delete("exp");
+    var rest = params.toString();
+    history.replaceState(null, "", location.pathname + location.search + (rest ? "#" + rest : ""));
+    return true;
+  } catch { return false; }
+}
 async function irenaCheckAccess() {
+  irenaConsumeWebToken();   // ДВЕРЬ 2 (в ТГ no-op, initData-путь ниже не тронут -> 870 целы)
   const cached = irenaGetStoredToken();
   if (cached) return true;
   const initData = irenaGetInitData();
@@ -689,6 +709,16 @@ function init() {
   document.querySelector('.app').classList.add('ready');
 }
 
+if (!irenaGetInitData()) {
+  var _b = document.getElementById("appBackBtn");
+  if (_b) {
+    var _t = localStorage.getItem("irena_access_token") || "";
+    var _e = parseInt(localStorage.getItem("irena_access_token_expires_at") || "0", 10);
+    var _r = Math.max(1, Math.round((_e - Date.now()) / 1000));
+    _b.href = "https://vladlen00.github.io/studio/?v=3" + (_t ? ("#irena_token=" + encodeURIComponent(_t) + "&exp=" + encodeURIComponent(_r)) : "");
+    _b.style.display = "inline-flex";
+  }
+}
 irenaCheckAccess().then(ok => { if (ok) init(); });
 </script>
 </body>
