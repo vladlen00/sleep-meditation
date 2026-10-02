@@ -2,6 +2,33 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+<!-- ВОЗВРАТ НА ПЛАТФОРМУ (02.10.2026, только веб). app.irenabio.com открывает практику с
+     #irena_token=...&irena_return=<адрес>, метка внутри дня - с адресом этого дня. Адрес
+     запоминаем в sessionStorage по ключу аппа и снимаем из адресной строки.
+     Вход с токеном БЕЗ адреса (из студии) стирает сохранённый, иначе «назад» увёл бы
+     в давний день вместо студии.
+     Принимаем только https://app.irenabio.com/. В Телеграме токена в хэше нет - no-op. -->
+<script>
+(function () {
+  try {
+    var raw = (location.hash || "").replace(/^#/, "");
+    if (!raw) return;
+    var p = new URLSearchParams(raw);
+    if (!p.get("irena_token")) return;
+    var key = "irena_return:" + location.pathname.split("/")[1];
+    var r = p.get("irena_return") || "";
+    if (r.indexOf("https://app.irenabio.com/") === 0) sessionStorage.setItem(key, r);
+    else sessionStorage.removeItem(key);
+    if (p.has("irena_return")) {
+      p.delete("irena_return");
+      history.replaceState(null, "", location.pathname + location.search + "#" + p.toString());
+    }
+  } catch (e) {}
+})();
+function irenaReturnUrl() {
+  try { return sessionStorage.getItem("irena_return:" + location.pathname.split("/")[1]) || ""; } catch (e) { return ""; }
+}
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Медитация глубокого сна — irena.bio</title>
 <script src="telegram-web-app.js"></script>
@@ -791,7 +818,7 @@ if (!irenaGetInitData()) {
     var _t = localStorage.getItem("irena_access_token") || "";
     var _e = parseInt(localStorage.getItem("irena_access_token_expires_at") || "0", 10);
     var _r = Math.max(1, Math.round((_e - Date.now()) / 1000));
-    _b.href = "https://vladlen00.github.io/studio/?v=7" + (_t ? ("#irena_token=" + encodeURIComponent(_t) + "&exp=" + encodeURIComponent(_r)) : "");
+    _b.href = irenaReturnUrl() || ("https://vladlen00.github.io/studio/?v=7" + (_t ? ("#irena_token=" + encodeURIComponent(_t) + "&exp=" + encodeURIComponent(_r)) : ""));
     _b.style.display = "inline-flex";
   }
 }
